@@ -2,7 +2,7 @@
   "name": "back-hw-01",
   "version": "1.0.0",
   "description": "",
-  "main": "app.js",
+  "main": "app.ts",
   "scripts": {
     "watch": "tsc -w",
     "dev": "yarn nodemon --inspect dist/app.js",
