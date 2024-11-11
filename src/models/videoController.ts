@@ -7,10 +7,11 @@ import {
     UpdateVideoInputModel,
     VideoType
 } from "./videoModels";
-import {db, getNextId} from "./db/db";
-import {validateCreateVideoInput} from "./videoValidation";
 
-export const getAllVideos = (req: Request, res: Response<VideoType[]>) => {
+import {validateCreateVideoInput} from "../utils/videoValidation";
+import {db, getNextId} from "../db/db";
+
+export const getAllVideos = (red: Request, res: Response<VideoType[]>) => {
     res.json(db.videos);
 };
 
@@ -55,11 +56,11 @@ export const updateVideo = (req: Request<{ id: string }, UpdateVideoInputModel>,
 
     const updateData: UpdateVideoInputModel = req.body;
 
-    if (updateData.title && (typeof updateData.title !== 'string' || updateData.title.length > 40)) {
+    if (updateData.title && updateData.title.length > 40) {
         res.status(HTTP_STATUSES.BAD_REQUEST_400).json({ errorsMessages: [{ message: "Title must be a string with a maximum length of 40.", field: "title" }] });
         return;
     }
-    if (updateData.author && (typeof updateData.author !== 'string' || updateData.author.length > 20)) {
+    if (updateData.author && updateData.author.length > 20) {
         res.status(HTTP_STATUSES.BAD_REQUEST_400).json({ errorsMessages: [{ message: "Author must be a string with a maximum length of 20.", field: "author" }] });
         return;
     }

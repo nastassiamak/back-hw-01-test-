@@ -1,5 +1,5 @@
 // Валидация входных данных при создании видео
-import {APIErrorResult, FieldError, Resolutions} from "./videoModels";
+import {APIErrorResult, FieldError, Resolutions} from "../models/videoModels";
 
 export function validateCreateVideoInput(input: Record<string, any>): APIErrorResult | null {
     const errors: FieldError[] = [];
