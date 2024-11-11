@@ -1,4 +1,5 @@
-import {VideoType} from "./videoModels";
+import {VideoType} from "../models/videoModels";
+
 
 export const db: DBType = {
     videos:[]

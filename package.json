@@ -2,7 +2,7 @@
   "name": "back-hw-01",
   "version": "1.0.0",
   "description": "",
-  "main": "app.ts",
+  "main": "src/app.ts",
   "scripts": {
     "watch": "tsc -w",
     "dev": "yarn nodemon --inspect dist/app.js",
@@ -13,14 +13,21 @@
   "author": "«nastassiamak» <redfox.asya@gmail.com>",
   "license": "MIT",
   "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "body-parser": "^1.20.3",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
     "dotenv": "^16.4.5",
-    "express": "^4.21.1"
+    "express": "^4.21.1",
+    "jsonwebtoken": "^9.0.2"
   },
   "devDependencies": {
+    "@types/cookie-parser": "^1.4.7",
     "@types/cors": "^2.8.17",
     "@types/dotenv": "^8.2.3",
     "@types/express": "^5.0.0",
     "@types/jest": "^29.5.14",
+    "@types/jsonwebtoken": "^9.0.7",
     "@types/node": "^22.8.1",
     "@types/supertest": "^6.0.2",
     "jest": "^29.7.0",

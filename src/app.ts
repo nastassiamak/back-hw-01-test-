@@ -1,6 +1,9 @@
 import express from 'express';
 import {SETTINGS} from "./setting";
 import {videosRouter} from "./models/videoRouter";
+import {HTTP_STATUSES} from "./models/videoModels";
+import {db} from "./db/db";
+
 
 //создание(не запуск) back
 const app = express() // создать приложение
@@ -13,6 +16,12 @@ app.get('/', (req, res) => {
     res.status(200).json({version: '1.0'})
 })
 app.use(SETTINGS.PATH.VIDEOS, videosRouter)
+
+//Дефолтное состояние БД
+app.delete('/__test__/data', (req, res) => {
+    db.videos = [];
+    res.sendStatus(HTTP_STATUSES.NO_CONTENT_204)
+});
 
 // экспортируем приложение по умолчанию
 export default app;
