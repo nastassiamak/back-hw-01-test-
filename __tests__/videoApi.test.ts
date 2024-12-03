@@ -86,60 +86,35 @@ describe('Video API', () => {
             title: 'Test Video',
             author: 'Test Author',
             availableResolutions: ['P360'],
+            canBeDownloaded: false,
         };
 
-        // Создаем новое видео
         const createRes = await request(app).post(SETTINGS.PATH.VIDEOS).send(newVideo);
         const videoId = createRes.body.id;
 
-        // Недопустимые данные для обновления
         const updatedVideo = {
-            title: null, // Неправильное значение
+            title: null,
             author: 'Updated Author',
-            availableResolutions: ['INVALID_RESOLUTION'], // Неправильное разрешение
-            canBeDownloaded: 'not-a-boolean' // Неправильное значение
+            availableResolutions: ['INVALID_RESOLUTION'], // invalid
+            canBeDownloaded: 'not-a-boolean',
         };
 
-        const res = await request(app).post(`${SETTINGS.PATH.VIDEOS}/${videoId}`).send(updatedVideo);
+        const res = await request(app).put(`${SETTINGS.PATH.VIDEOS}/${videoId}`).send(updatedVideo);
         expect(res.status).toBe(HTTP_STATUSES.BAD_REQUEST_400);
-        //expect(res.body.errorsMessages).toHaveLength(3); // Ожидаем, что длина 3
-        expect(res.body.errorsMessages[0].field).toBe('title'); // Заголовок должен содержать ошибку
-        expect(res.body.errorsMessages[1].field).toBe('availableResolutions'); // Доступные разрешения должны содержать ошибку
-        expect(res.body.errorsMessages[2].field).toBe('canBeDownloaded'); // canBeDownloaded должна содержать ошибку
+        expect(res.body.errorsMessages).toHaveLength(3); // Ожидание 3 ошибки
+        expect(res.body.errorsMessages[0].field).toBe('title');
+        expect(res.body.errorsMessages[1].field).toBe('availableResolutions');
+        expect(res.body.errorsMessages[2].field).toBe('canBeDownloaded');
+        // expect(res.body.errorsMessages[0].field).toBe('availableResolutions');
+        // expect(res.body.errorsMessages[0].message).toContain('Invalid resolutions');
+        //  expect(res.body.errorsMessages[0].field).toBe('title');
+        // expect(res.body.errorsMessages[0].message).toContain('Invalid');
 
-        // const newVideo = {
-        //     title: 'Test Video',
-        //     author: 'Test Author',
-        //     availableResolutions: ['P360'],
-        //     canBeDownloaded: false,
-        // };
-        //
-        // const createRes = await request(app).post(SETTINGS.PATH.VIDEOS).send(newVideo);
-        // const videoId = createRes.body.id;
-        //
-        // const updatedVideo = {
-        //     title: null,
-        //     author: 'Updated Author',
-        //     availableResolutions: ['INVALID_RESOLUTION'], // invalid
-        //     canBeDownloaded: 'not-a-boolean',
-        // };
-        //
-        // const res = await request(app).put(`${SETTINGS.PATH.VIDEOS}/${videoId}`).send(updatedVideo);
-        // expect(res.status).toBe(HTTP_STATUSES.BAD_REQUEST_400);
-        // expect(res.body.errorsMessages).toHaveLength(3); // Ожидание 3 ошибки
-        // expect(res.body.errorsMessages[0].field).toBe('title');
-        // expect(res.body.errorsMessages[1].field).toBe('availableResolutions');
-        // expect(res.body.errorsMessages[2].field).toBe('canBeDownloaded');
-        // // expect(res.body.errorsMessages[0].field).toBe('availableResolutions');
-        // // expect(res.body.errorsMessages[0].message).toContain('Invalid resolutions');
-        // //  expect(res.body.errorsMessages[0].field).toBe('title');
-        // // expect(res.body.errorsMessages[0].message).toContain('Invalid');
-        //
-        //
-        // // проверяем, что видео не обновилось
-        // const getRes = await request(app).get(`${SETTINGS.PATH.VIDEOS}/${videoId}`);
-        // expect(getRes.body.title).toBe(newVideo.title);
-        // expect(getRes.body.author).toBe(newVideo.author);
+
+        // проверяем, что видео не обновилось
+        const getRes = await request(app).get(`${SETTINGS.PATH.VIDEOS}/${videoId}`);
+        expect(getRes.body.title).toBe(newVideo.title);
+        expect(getRes.body.author).toBe(newVideo.author);
     });
 
     it('DELETE /videos/:id - Delete video by id', async () => {
