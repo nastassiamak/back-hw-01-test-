@@ -28,6 +28,11 @@ export function validateCreateVideoInput(input: Record<string, any>): APIErrorRe
             });
         }
     }
+    // Проверка canBeDownloaded
+    if (input.canBeDownloaded !== undefined && typeof input.canBeDownloaded !== 'boolean') {
+        errors.push({ message: "CanBeDownloaded must be a boolean.", field: "canBeDownloaded" });
+    }
+
 
     return errors.length > 0 ? {errorsMessages: errors} : null;
 }
