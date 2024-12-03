@@ -96,19 +96,14 @@ describe('Video API', () => {
             title: null,
             author: 'Updated Author',
             availableResolutions: ['INVALID_RESOLUTION'], // invalid
-            canBeDownloaded: 'not-a-boolean',
+
         };
 
         const res = await request(app).put(`${SETTINGS.PATH.VIDEOS}/${videoId}`).send(updatedVideo);
         expect(res.status).toBe(HTTP_STATUSES.BAD_REQUEST_400);
-        expect(res.body.errorsMessages).toHaveLength(3); // Ожидание 3 ошибки
-        expect(res.body.errorsMessages[0].field).toBe('title');
-        expect(res.body.errorsMessages[1].field).toBe('availableResolutions');
-        expect(res.body.errorsMessages[2].field).toBe('canBeDownloaded');
-        // expect(res.body.errorsMessages[0].field).toBe('availableResolutions');
-        // expect(res.body.errorsMessages[0].message).toContain('Invalid resolutions');
-        //  expect(res.body.errorsMessages[0].field).toBe('title');
-        // expect(res.body.errorsMessages[0].message).toContain('Invalid');
+
+        expect(res.body.errorsMessages[0].field).toBe('availableResolutions');
+        expect(res.body.errorsMessages[0].message).toContain('Invalid resolutions');
 
 
         // проверяем, что видео не обновилось

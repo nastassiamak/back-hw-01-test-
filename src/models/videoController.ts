@@ -81,11 +81,7 @@ export const updateVideo = (req: Request<{ id: string }, UpdateVideoInputModel>,
         video.availableResolutions = updateData.availableResolutions;
     }
 
-    // Проверка canBeDownloaded
-    if (updateData.canBeDownloaded) {
-        res.status(HTTP_STATUSES.BAD_REQUEST_400).json({ message: "CanBeDownloaded must be a boolean.", field: "canBeDownloaded" });
 
-    }
 
     // Здесь идет обновление других полей
 
