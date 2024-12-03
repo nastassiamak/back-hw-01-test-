@@ -27,6 +27,7 @@ describe('Video API', () => {
             title: 'Test Video',
             author: 'Test Author',
             availableResolutions: ['P360', 'P720'],
+            canBeDownloaded: false,
         };
 
         const res = await request(app).post(SETTINGS.PATH.VIDEOS).send(newVideo);
@@ -67,6 +68,7 @@ describe('Video API', () => {
             title: 'Test Video',
             author: 'Test Author',
             availableResolutions: ['P360'],
+            canBeDownloaded: false,
         };
 
         const createRes = await request(app).post(SETTINGS.PATH.VIDEOS).send(newVideo);
@@ -83,15 +85,17 @@ describe('Video API', () => {
             title: 'Test Video',
             author: 'Test Author',
             availableResolutions: ['P360'],
+            canBeDownloaded: false,
         };
 
         const createRes = await request(app).post(SETTINGS.PATH.VIDEOS).send(newVideo);
         const videoId = createRes.body.id;
 
         const updatedVideo = {
-            title: 'Updated Title',
+            title: null,
             author: 'Updated Author',
             availableResolutions: ['INVALID_RESOLUTION'], // invalid
+            canBeDownloaded: 'false',
         };
 
         const res = await request(app).put(`${SETTINGS.PATH.VIDEOS}/${videoId}`).send(updatedVideo);
@@ -110,6 +114,7 @@ describe('Video API', () => {
             title: 'Test Video',
             author: 'Test Author',
             availableResolutions: ['P360'],
+            canBeDownloaded: false,
         };
 
         const createRes = await request(app).post(SETTINGS.PATH.VIDEOS).send(newVideo);
