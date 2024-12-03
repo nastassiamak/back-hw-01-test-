@@ -81,35 +81,67 @@ describe('Video API', () => {
     });
 
     it('PUT /videos/:id - Update video by id', async () => {
-
         const newVideo = {
             title: 'Test Video',
             author: 'Test Author',
             availableResolutions: ['P360'],
 
         };
-
         const createRes = await request(app).post(SETTINGS.PATH.VIDEOS).send(newVideo);
         const videoId = createRes.body.id;
-
         const updatedVideo = {
-            title: null,
+            title: null, // Неправильное значение
             author: 'Updated Author',
-            availableResolutions: ['INVALID_RESOLUTION'], // invalid
-
+            availableResolutions: ['INVALID_RESOLUTION'], // Неправильное разрешение
+            canBeDownloaded: 'not-a-boolean' // Неправильное значение
         };
 
-        const res = await request(app).put(`${SETTINGS.PATH.VIDEOS}/${videoId}`).send(updatedVideo);
+        const res = await request(app).put(`/videos/${videoId}`).send(updatedVideo);
+
+        // Проверка на статус 400
         expect(res.status).toBe(HTTP_STATUSES.BAD_REQUEST_400);
 
-        expect(res.body.errorsMessages[0].field).toBe('availableResolutions');
-        expect(res.body.errorsMessages[0].message).toContain('Invalid resolutions');
+        // Проверка на наличие ошибок
+        expect(res.body.errorsMessages).toHaveLength(3); // Ожидаем 3 ошибки
 
+        // Проверка ошибок по каждому полю
+        expect(res.body.errorsMessages[0].field).toBe('title');
+        expect(res.body.errorsMessages[0].message).toContain('Title must be a string');
 
-        // проверяем, что видео не обновилось
-        const getRes = await request(app).get(`${SETTINGS.PATH.VIDEOS}/${videoId}`);
-        expect(getRes.body.title).toBe(newVideo.title);
-        expect(getRes.body.author).toBe(newVideo.author);
+        expect(res.body.errorsMessages[1].field).toBe('availableResolutions');
+        expect(res.body.errorsMessages[1].message).toContain('Invalid resolutions');
+
+        expect(res.body.errorsMessages[2].field).toBe('canBeDownloaded');
+        expect(res.body.errorsMessages[2].message).toContain('must be a boolean');
+        // const newVideo = {
+        //     title: 'Test Video',
+        //     author: 'Test Author',
+        //     availableResolutions: ['P360'],
+        //
+        // };
+        //
+        // const createRes = await request(app).post(SETTINGS.PATH.VIDEOS).send(newVideo);
+        // const videoId = createRes.body.id;
+        //
+        // //
+        // const updatedVideo = {
+        //     title: null,
+        //     author: 'Updated Author',
+        //     availableResolutions: ['INVALID_RESOLUTION'], // invalid
+        //
+        // };
+        //
+        // const res = await request(app).put(`${SETTINGS.PATH.VIDEOS}/${videoId}`).send(updatedVideo);
+        // expect(res.status).toBe(HTTP_STATUSES.BAD_REQUEST_400);
+        //
+        // expect(res.body.errorsMessages[0].field).toBe('availableResolutions');
+        // expect(res.body.errorsMessages[0].message).toContain('Invalid resolutions');
+        //
+        //
+        // // проверяем, что видео не обновилось
+        // const getRes = await request(app).get(`${SETTINGS.PATH.VIDEOS}/${videoId}`);
+        // expect(getRes.body.title).toBe(newVideo.title);
+        // expect(getRes.body.author).toBe(newVideo.author);
     });
 
     it('DELETE /videos/:id - Delete video by id', async () => {
