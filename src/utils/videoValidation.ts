@@ -4,6 +4,7 @@ import {APIErrorResult, FieldError, Resolutions} from "../models/videoModels";
 export function validateCreateVideoInput(input: Record<string, any>): APIErrorResult | null {
     const errors: FieldError[] = [];
 
+
     if (!input.title || typeof input.title !== 'string' || input.title.length > 40) {
         errors.push({ message: "Title is required and must be a string with a maximum length of 40.", field: "title" });
     }
@@ -21,5 +22,9 @@ export function validateCreateVideoInput(input: Record<string, any>): APIErrorRe
             errors.push({ message: `Invalid resolutions: ${invalidResolutions.join(', ')}`, field: "availableResolutions" });
         }
     }
+    // Проверка canBeDownloaded
+    // if (typeof input.canBeDownloaded !== 'boolean') {
+    //     errors.push({ message: "CanBeDownloaded must be a boolean.", field: "canBeDownloaded" });
+    // }
     return errors.length > 0 ? { errorsMessages: errors } : null;
 }
