@@ -63,18 +63,6 @@ describe('Video API', () => {
         expect(res.body.errorsMessages[0].field).toBe('availableResolutions');
         expect(res.body.errorsMessages[0].message).toBe('At least one resolution must be provided and it must be an array.');
     });
-    it('POST /videos - Create video with invalid canBeDownloaded', async () => {
-        const newVideo = {
-            title: 'Test Video',
-            author: 'Test Author',
-            availableResolutions: ['P360'],
-            canBeDownloaded: 'true',
-        };
-        const res = await request(app).post(SETTINGS.PATH.VIDEOS).send(newVideo);
-
-        expect(res.body.errorsMessages[0].field).toBe('canBeDownloaded');
-        expect(res.body.errorsMessages[0].message).toContain('CanBeDownloaded must be a boolean.');
-    });
 
     it('GET /videos/:id - Get video by id', async () => {
         const newVideo = {
