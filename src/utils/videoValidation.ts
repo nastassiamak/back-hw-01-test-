@@ -1,16 +1,18 @@
-// Валидация входных данных при создании видео
-import {APIErrorResult, FieldError, Resolutions} from "../models/videoModels";
+import {APIErrorResult, FieldError, Resolutions, UpdateVideoInputModel} from "../models/videoModels";
 
-export function validateCreateVideoInput(input: Record<string, any>): APIErrorResult | null {
+export function validateCreateVideoInput(input: UpdateVideoInputModel): APIErrorResult | null {
     const errors: FieldError[] = [];
 
-
+    // Проверка title
     if (!input.title || typeof input.title !== 'string' || input.title.length > 40) {
-        errors.push({message: "Title is required and must be a string with a maximum length of 40.", field: "title"});
+        errors.push({ message: "Title is required and must be a string with a maximum length of 40.", field: "title" });
     }
-    if (!input.author || typeof input.author !== 'string' || input.author.length > 20) {
-        errors.push({message: "Author is required and must be a string with a maximum length of 20.", field: "author"});
+
+    // Проверка author
+    if (input.author !== undefined && (typeof input.author !== 'string' || input.author.length > 20)) {
+        errors.push({ message: "Author is required and must be a string with a maximum length of 20.", field: "author" });
     }
+
     // Проверка доступных разрешений
     if (!Array.isArray(input.availableResolutions) || input.availableResolutions.length === 0) {
         errors.push({
@@ -28,11 +30,12 @@ export function validateCreateVideoInput(input: Record<string, any>): APIErrorRe
             });
         }
     }
+
     // Проверка canBeDownloaded
     if (input.canBeDownloaded !== undefined && typeof input.canBeDownloaded !== 'boolean') {
         errors.push({ message: "CanBeDownloaded must be a boolean.", field: "canBeDownloaded" });
     }
 
-
-    return errors.length > 0 ? {errorsMessages: errors} : null;
+    // Возвращаем ошибки, если они есть
+    return errors.length > 0 ? { errorsMessages: errors } : null;
 }

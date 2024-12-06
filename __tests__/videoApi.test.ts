@@ -59,8 +59,21 @@ describe('Video API', () => {
 
         const res = await request(app).post(SETTINGS.PATH.VIDEOS).send(newVideo);
         expect(res.status).toBe(HTTP_STATUSES.BAD_REQUEST_400);
+
         expect(res.body.errorsMessages[0].field).toBe('availableResolutions');
         expect(res.body.errorsMessages[0].message).toBe('At least one resolution must be provided and it must be an array.');
+    });
+    it('POST /videos - Create video with invalid canBeDownloaded', async () => {
+        const newVideo = {
+            title: 'Test Video',
+            author: 'Test Author',
+            availableResolutions: ['P360'],
+            canBeDownloaded: 'true',
+        };
+        const res = await request(app).post(SETTINGS.PATH.VIDEOS).send(newVideo);
+
+        expect(res.body.errorsMessages[0].field).toBe('canBeDownloaded');
+        expect(res.body.errorsMessages[0].message).toContain('CanBeDownloaded must be a boolean.');
     });
 
     it('GET /videos/:id - Get video by id', async () => {
@@ -80,69 +93,44 @@ describe('Video API', () => {
         expect(res.body.author).toBe(newVideo.author);
     });
 
+
+
     it('PUT /videos/:id - Update video by id', async () => {
+
         const newVideo = {
             title: 'Test Video',
             author: 'Test Author',
             availableResolutions: ['P360'],
 
         };
+
         const createRes = await request(app).post(SETTINGS.PATH.VIDEOS).send(newVideo);
         const videoId = createRes.body.id;
+
         const updatedVideo = {
-            title: null, // Неправильное значение
+            title: null,
             author: 'Updated Author',
-            availableResolutions: ['INVALID_RESOLUTION'], // Неправильное разрешение
-            canBeDownloaded: 'not-a-boolean' // Неправильное значение
+            availableResolutions: ['INVALID_RESOLUTION'], // invalid
+            canBeDownloaded: 'not-a-boolean',
         };
 
-        const res = await request(app).put(`/videos/${videoId}`).send(updatedVideo);
-
-        // Проверка на статус 400
-        expect(res.status).toBe(HTTP_STATUSES.BAD_REQUEST_400);
-
-        // Проверка на наличие ошибок
+        const res = await request(app).put(`${SETTINGS.PATH.VIDEOS}/${videoId}`).send(updatedVideo);
+        expect(res.status).toBe(400); // Ожидаем статус 400
         expect(res.body.errorsMessages).toHaveLength(3); // Ожидаем 3 ошибки
-
-        // Проверка ошибок по каждому полю
         expect(res.body.errorsMessages[0].field).toBe('title');
-        expect(res.body.errorsMessages[0].message).toContain('Title must be a string');
-
         expect(res.body.errorsMessages[1].field).toBe('availableResolutions');
-        expect(res.body.errorsMessages[1].message).toContain('Invalid resolutions');
-
         expect(res.body.errorsMessages[2].field).toBe('canBeDownloaded');
+        expect(res.body.errorsMessages[0].message).toContain('Title is required');
+        expect(res.body.errorsMessages[1].message).toContain('Invalid resolutions');
         expect(res.body.errorsMessages[2].message).toContain('must be a boolean');
-        // const newVideo = {
-        //     title: 'Test Video',
-        //     author: 'Test Author',
-        //     availableResolutions: ['P360'],
-        //
-        // };
-        //
-        // const createRes = await request(app).post(SETTINGS.PATH.VIDEOS).send(newVideo);
-        // const videoId = createRes.body.id;
-        //
-        // //
-        // const updatedVideo = {
-        //     title: null,
-        //     author: 'Updated Author',
-        //     availableResolutions: ['INVALID_RESOLUTION'], // invalid
-        //
-        // };
-        //
-        // const res = await request(app).put(`${SETTINGS.PATH.VIDEOS}/${videoId}`).send(updatedVideo);
-        // expect(res.status).toBe(HTTP_STATUSES.BAD_REQUEST_400);
-        //
-        // expect(res.body.errorsMessages[0].field).toBe('availableResolutions');
-        // expect(res.body.errorsMessages[0].message).toContain('Invalid resolutions');
-        //
-        //
+    });
+
+
         // // проверяем, что видео не обновилось
         // const getRes = await request(app).get(`${SETTINGS.PATH.VIDEOS}/${videoId}`);
         // expect(getRes.body.title).toBe(newVideo.title);
         // expect(getRes.body.author).toBe(newVideo.author);
-    });
+
 
     it('DELETE /videos/:id - Delete video by id', async () => {
         const newVideo = {

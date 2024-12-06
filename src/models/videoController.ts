@@ -46,8 +46,10 @@ export const createVideo = (req: Request<CreateVideoInputModel>, res: Response<V
     res.status(HTTP_STATUSES.CREATED_201).json(newVideo);
 };
 
+
 // Функция обновления видео
 export const updateVideo = (req: Request<{ id: string }, UpdateVideoInputModel>, res: Response) => {
+
     const video = db.videos.find(v => v.id === Number(req.params.id));
     if (!video) {
         res.status(HTTP_STATUSES.NOT_FOUND_404).json({ errorsMessages: [{ message: "Video not found", field: "id" }] });
@@ -55,33 +57,11 @@ export const updateVideo = (req: Request<{ id: string }, UpdateVideoInputModel>,
     }
 
     const updateData: UpdateVideoInputModel = req.body;
-
-    if (updateData.title && updateData.title.length > 40) {
-        res.status(HTTP_STATUSES.BAD_REQUEST_400).json({ errorsMessages: [{ message: "Title must be a string with a maximum length of 40.", field: "title" }] });
+    const validationError = validateCreateVideoInput(updateData);
+    if (validationError) {
+        res.status(HTTP_STATUSES.BAD_REQUEST_400).json(validationError);
         return;
     }
-    if (updateData.author && updateData.author.length > 20) {
-        res.status(HTTP_STATUSES.BAD_REQUEST_400).json({ errorsMessages: [{ message: "Author must be a string with a maximum length of 20.", field: "author" }] });
-        return;
-    }
-    // Проверка доступных разрешений
-    if (updateData.availableResolutions) {
-        if (!Array.isArray(updateData.availableResolutions) || updateData.availableResolutions.length === 0) {
-            res.status(HTTP_STATUSES.BAD_REQUEST_400).json({ errorsMessages: [{ message: "At least one resolution must be provided and it must be an array.", field: "availableResolutions" }] });
-        return;
-        }
-
-        const invalidResolutions = updateData.availableResolutions.filter((resolution: string) =>
-            !Object.values(Resolutions).includes(resolution as Resolutions)
-        );
-        if (invalidResolutions.length > 0) {
-           res.status(HTTP_STATUSES.BAD_REQUEST_400).json({ errorsMessages: [{ message: `Invalid resolutions: ${invalidResolutions.join(', ')}`, field: "availableResolutions" }] });
-        return;
-        }
-        video.availableResolutions = updateData.availableResolutions;
-    }
-
-
 
     // Здесь идет обновление других полей
 

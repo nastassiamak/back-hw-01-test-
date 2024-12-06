@@ -22,7 +22,7 @@ export type VideoType = {
     id: number;
     title: string;
     author: string;
-    canBeDownloaded: boolean;
+    canBeDownloaded?: boolean;
     minAgeRestriction?: number | null;
     createdAt: string;
     publicationDate: string;
@@ -30,12 +30,12 @@ export type VideoType = {
 }
 
 export type FieldError = {
-    message?: string;
-    field?: string;
+    message: string;
+    field: string;
 }
 
 export type APIErrorResult = {
-    errorsMessages?: FieldError[];
+    errorsMessages: FieldError[];
 }
 
 export type CreateVideoInputModel = {
