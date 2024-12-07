@@ -59,9 +59,21 @@ describe('Video API', () => {
 
         const res = await request(app).post(SETTINGS.PATH.VIDEOS).send(newVideo);
         expect(res.status).toBe(HTTP_STATUSES.BAD_REQUEST_400);
-
         expect(res.body.errorsMessages[0].field).toBe('availableResolutions');
         expect(res.body.errorsMessages[0].message).toBe('At least one resolution must be provided and it must be an array.');
+    });
+    it('POST /videos - Create video with invalid canBeDownloaded', async () => {
+        const newVideo = {
+            title: 'Test Video',
+            author: 'Test Author',
+            availableResolutions: ['P360'], // one invalid resolution
+            canBeDownloaded: 'true',
+        };
+
+        const res = await request(app).post(SETTINGS.PATH.VIDEOS).send(newVideo);
+        expect(res.status).toBe(HTTP_STATUSES.BAD_REQUEST_400);
+        expect(res.body.errorsMessages[0].field).toBe('canBeDownloaded');
+        expect(res.body.errorsMessages[0].message).toContain('CanBeDownloaded must be a boolean.');
     });
 
     it('GET /videos/:id - Get video by id', async () => {
@@ -84,36 +96,55 @@ describe('Video API', () => {
 
 
     it('PUT /videos/:id - Update video by id', async () => {
-
         const newVideo = {
             title: 'Test Video',
             author: 'Test Author',
             availableResolutions: ['P360'],
-
+            canBeDownloaded: false  // Ensure this is set
         };
 
         const createRes = await request(app).post(SETTINGS.PATH.VIDEOS).send(newVideo);
         const videoId = createRes.body.id;
 
         const updatedVideo = {
-            title: null,
+            title: null, // Invalid
             author: 'Updated Author',
-            availableResolutions: ['INVALID_RESOLUTION'], // invalid
-            canBeDownloaded: 'not-a-boolean',
+            availableResolutions: ['INVALID_RESOLUTION'], // Invalid
+            canBeDownloaded: 'not-a-boolean', // Invalid
         };
 
         const res = await request(app).put(`${SETTINGS.PATH.VIDEOS}/${videoId}`).send(updatedVideo);
-        expect(res.status).toBe(400); // Ожидаем статус 400
-        expect(res.body.errorsMessages).toHaveLength(3); // Ожидаем 3 ошибки
-        expect(res.body.errorsMessages[0].field).toBe('title');
-        expect(res.body.errorsMessages[1].field).toBe('availableResolutions');
-        expect(res.body.errorsMessages[2].field).toBe('canBeDownloaded');
-        expect(res.body.errorsMessages[0].message).toContain('Title is required');
-        expect(res.body.errorsMessages[1].message).toContain('Invalid resolutions');
-        expect(res.body.errorsMessages[2].message).toContain('must be a boolean');
+        expect(res.status).toBe(400); // Expecting status 400
+        expect(res.body.errorsMessages).toHaveLength(3); // Adjust to 3 based on actual errors returned
+
+        // Check specific error messages
+        expect(res.body.errorsMessages).toEqual(expect.arrayContaining([
+            expect.objectContaining({ field: 'title', message: expect.stringContaining('Title is required') }),
+            expect.objectContaining({ field: 'availableResolutions', message: expect.stringContaining('Invalid resolutions') }),
+            expect.objectContaining({ field: 'canBeDownloaded', message: expect.stringContaining('must be a boolean') }),
+        ]));
+
+        // // Verify the video was NOT updated successfully
+        // const getResponse = await request(app).get(`${SETTINGS.PATH.VIDEOS}/${videoId}`);
+        // expect(getResponse.status).toBe(HTTP_STATUSES.OK_200); // Expecting status 200 OK
+        // expect(getResponse.body.title).toBe(newVideo.title); // Confirm title has not changed
+        // expect(getResponse.body.author).toBe(newVideo.author); // Confirm author has not changed
+        // expect(getResponse.body.availableResolutions).toEqual(expect.arrayContaining(newVideo.availableResolutions)); // Confirm resolutions unchanged
+        // expect(getResponse.body.canBeDownloaded).toBeUndefined(); // Confirm canBeDownloaded has not been defined yet
     });
 
-
+        // const res = await request(app).put(`${SETTINGS.PATH.VIDEOS}/${videoId}`).send(updatedVideo);
+        // expect(res.status).toBe(HTTP_STATUSES.BAD_REQUEST_400);
+        //
+        // expect(res.body.errorsMessages[0].field).toBe('title');
+        // expect(res.body.errorsMessages[0].message).toContain('Title is required and must be a string with a maximum length of 40.');
+        // expect(res.body.errorsMessages[1].field).toBe('availableResolutions');
+        // expect(res.body.errorsMessages[0].message).toContain('Invalid resolutions');
+        // expect(res.body.errorsMessages[2].field).toBe('canBeDownloaded');
+        // expect(res.body.errorsMessages[0].message).toContain('CanBeDownloaded must be a boolean.');
+        //
+        //
+        //
         // // проверяем, что видео не обновилось
         // const getRes = await request(app).get(`${SETTINGS.PATH.VIDEOS}/${videoId}`);
         // expect(getRes.body.title).toBe(newVideo.title);

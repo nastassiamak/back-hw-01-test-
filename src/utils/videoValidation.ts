@@ -35,7 +35,7 @@ export function validateCreateVideoInput(input: UpdateVideoInputModel): APIError
     if (input.canBeDownloaded !== undefined && typeof input.canBeDownloaded !== 'boolean') {
         errors.push({ message: "CanBeDownloaded must be a boolean.", field: "canBeDownloaded" });
     }
-
+    console.log(errors)
     // Возвращаем ошибки, если они есть
     return errors.length > 0 ? { errorsMessages: errors } : null;
 }
