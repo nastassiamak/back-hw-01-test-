@@ -1,5 +1,4 @@
 import {APIErrorResult, FieldError, Resolutions, UpdateVideoInputModel} from "../models/videoModels";
-
 export function validateCreateVideoInput(input: UpdateVideoInputModel): APIErrorResult | null {
     const errors: FieldError[] = [];
 
@@ -13,21 +12,16 @@ export function validateCreateVideoInput(input: UpdateVideoInputModel): APIError
         errors.push({ message: "Author is required and must be a string with a maximum length of 20.", field: "author" });
     }
 
-    // Проверка доступных разрешений
+    // Проверка availableResolutions
     if (!Array.isArray(input.availableResolutions) || input.availableResolutions.length === 0) {
-        errors.push({
-            message: "At least one resolution must be provided and it must be an array.",
-            field: "availableResolutions"
-        });
+        errors.push({ message: "At least one resolution must be provided and it must be an array.", field: "availableResolutions" });
     } else {
-        const invalidResolutions = input.availableResolutions.filter((resolution: string) =>
+        // Проверка разрешений
+        const invalidResolutions = input.availableResolutions.filter(resolution =>
             !Object.values(Resolutions).includes(resolution as Resolutions)
         );
         if (invalidResolutions.length > 0) {
-            errors.push({
-                message: `Invalid resolutions: ${invalidResolutions.join(', ')}`,
-                field: "availableResolutions"
-            });
+            errors.push({ message: `Invalid resolutions: ${invalidResolutions.join(', ')}`, field: "availableResolutions" });
         }
     }
 
@@ -45,7 +39,5 @@ export function validateCreateVideoInput(input: UpdateVideoInputModel): APIError
         }
     }
 
-    console.log(errors)
-    // Возвращаем ошибки, если они есть
     return errors.length > 0 ? { errorsMessages: errors } : null;
 }
