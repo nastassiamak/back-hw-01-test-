@@ -48,7 +48,8 @@ export const createVideo = (req: Request<CreateVideoInputModel>, res: Response<V
 
 
 // Функция обновления видео
-export const updateVideo = (req: Request<{ id: string }, UpdateVideoInputModel>, res: Response) => {
+export const updateVideo = (req: Request<{ id: string }, {}, UpdateVideoInputModel>,
+                            res: Response<APIErrorResult | null>) => {
 
     const video = db.videos.find(v => v.id === Number(req.params.id));
     if (!video) {
