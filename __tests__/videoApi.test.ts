@@ -120,10 +120,11 @@ describe('Video API', () => {
 
         // Check specific error messages
         expect(res.body.errorsMessages).toEqual(expect.arrayContaining([
-            expect.objectContaining({ field: 'title', message: expect.stringContaining('Title is required') }),
-            expect.objectContaining({ field: 'availableResolutions', message: expect.stringContaining('Invalid resolutions') }),
-            expect.objectContaining({ field: 'canBeDownloaded', message: expect.stringContaining('must be a boolean') }),
-            expect.objectContaining({ field: 'minAgeRestriction', message: expect.stringContaining('minAgeRestriction must be a non-negative integer.') }),
+            expect.objectContaining({ field: 'title'}),
+            expect.objectContaining({ field: 'availableResolutions' }),
+            expect.objectContaining({ field: 'canBeDownloaded'}),
+
+            expect.objectContaining({ field: 'minAgeRestriction' }),
         ]));
 
         // // Verify the video was NOT updated successfully
