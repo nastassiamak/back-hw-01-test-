@@ -62,6 +62,7 @@ describe('Video API', () => {
         expect(res.body.errorsMessages[0].field).toBe('availableResolutions');
         expect(res.body.errorsMessages[0].message).toBe('At least one resolution must be provided and it must be an array.');
     });
+
     it('POST /videos - Create video with invalid canBeDownloaded', async () => {
         const newVideo = {
             title: 'Test Video',
@@ -93,14 +94,13 @@ describe('Video API', () => {
         expect(res.body.author).toBe(newVideo.author);
     });
 
-
-
     it('PUT /videos/:id - Update video by id', async () => {
         const newVideo = {
             title: 'Test Video',
             author: 'Test Author',
             availableResolutions: ['P360'],
-            canBeDownloaded: false  // Ensure this is set
+            canBeDownloaded: false,
+            minAgeRestriction: 18
         };
 
         const createRes = await request(app).post(SETTINGS.PATH.VIDEOS).send(newVideo);
@@ -111,17 +111,19 @@ describe('Video API', () => {
             author: 'Updated Author',
             availableResolutions: ['INVALID_RESOLUTION'], // Invalid
             canBeDownloaded: 'not-a-boolean', // Invalid
+            minAgeRestriction: -1
         };
 
         const res = await request(app).put(`${SETTINGS.PATH.VIDEOS}/${videoId}`).send(updatedVideo);
         expect(res.status).toBe(400); // Expecting status 400
-        expect(res.body.errorsMessages).toHaveLength(3); // Adjust to 3 based on actual errors returned
+        expect(res.body.errorsMessages).toHaveLength(4); // Adjust to 3 based on actual errors returned
 
         // Check specific error messages
         expect(res.body.errorsMessages).toEqual(expect.arrayContaining([
             expect.objectContaining({ field: 'title', message: expect.stringContaining('Title is required') }),
             expect.objectContaining({ field: 'availableResolutions', message: expect.stringContaining('Invalid resolutions') }),
             expect.objectContaining({ field: 'canBeDownloaded', message: expect.stringContaining('must be a boolean') }),
+            expect.objectContaining({ field: 'minAgeRestriction', message: expect.stringContaining('minAgeRestriction must be a non-negative integer.') }),
         ]));
 
         // // Verify the video was NOT updated successfully
