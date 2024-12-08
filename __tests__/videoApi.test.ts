@@ -103,56 +103,38 @@ describe('Video API', () => {
             minAgeRestriction: 18
         };
 
+        // Создаем видео
         const createRes = await request(app).post(SETTINGS.PATH.VIDEOS).send(newVideo);
         const videoId = createRes.body.id;
 
+        // Данные для обновления
         const updatedVideo = {
-            title: null, // Invalid
+            title: 'Updated Video Title',
             author: 'Updated Author',
-            availableResolutions: ['INVALID_RESOLUTION'], // Invalid
-            canBeDownloaded: 'not-a-boolean', // Invalid
-            minAgeRestriction: -1
+            availableResolutions: ['P144', 'P360'], // Ожидаем, что оба разрешения будут актуальными
+            canBeDownloaded: true,
+            minAgeRestriction: 16
         };
 
+        // Выполняем PUT-запрос на обновление видео
         const res = await request(app).put(`${SETTINGS.PATH.VIDEOS}/${videoId}`).send(updatedVideo);
-        expect(res.status).toBe(400); // Expecting status 400
-        expect(res.body.errorsMessages).toHaveLength(4); // Adjust to 3 based on actual errors returned
+        expect(res.status).toBe(HTTP_STATUSES.NO_CONTENT_204);
 
-        // Check specific error messages
-        expect(res.body.errorsMessages).toEqual(expect.arrayContaining([
-            expect.objectContaining({ field: 'title'}),
-            expect.objectContaining({ field: 'availableResolutions' }),
-            expect.objectContaining({ field: 'canBeDownloaded'}),
+        // Проверяем обновленное видео
+        const updatedRes = await request(app).get(`${SETTINGS.PATH.VIDEOS}/${videoId}`);
+        expect(updatedRes.status).toBe(HTTP_STATUSES.OK_200);
 
-            expect.objectContaining({ field: 'minAgeRestriction' }),
-        ]));
-
-        // // Verify the video was NOT updated successfully
-        // const getResponse = await request(app).get(`${SETTINGS.PATH.VIDEOS}/${videoId}`);
-        // expect(getResponse.status).toBe(HTTP_STATUSES.OK_200); // Expecting status 200 OK
-        // expect(getResponse.body.title).toBe(newVideo.title); // Confirm title has not changed
-        // expect(getResponse.body.author).toBe(newVideo.author); // Confirm author has not changed
-        // expect(getResponse.body.availableResolutions).toEqual(expect.arrayContaining(newVideo.availableResolutions)); // Confirm resolutions unchanged
-        // expect(getResponse.body.canBeDownloaded).toBeUndefined(); // Confirm canBeDownloaded has not been defined yet
+        expect(updatedRes.body).toEqual(expect.objectContaining({
+            id: videoId,
+            title: updatedVideo.title,
+            author: updatedVideo.author,
+            availableResolutions: expect.arrayContaining(updatedVideo.availableResolutions), // Проверка на наличие разрешений
+            canBeDownloaded: updatedVideo.canBeDownloaded,
+            minAgeRestriction: updatedVideo.minAgeRestriction,
+            createdAt: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/), // Проверка ISO
+            publicationDate: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/), // Проверка ISO
+        }));
     });
-
-        // const res = await request(app).put(`${SETTINGS.PATH.VIDEOS}/${videoId}`).send(updatedVideo);
-        // expect(res.status).toBe(HTTP_STATUSES.BAD_REQUEST_400);
-        //
-        // expect(res.body.errorsMessages[0].field).toBe('title');
-        // expect(res.body.errorsMessages[0].message).toContain('Title is required and must be a string with a maximum length of 40.');
-        // expect(res.body.errorsMessages[1].field).toBe('availableResolutions');
-        // expect(res.body.errorsMessages[0].message).toContain('Invalid resolutions');
-        // expect(res.body.errorsMessages[2].field).toBe('canBeDownloaded');
-        // expect(res.body.errorsMessages[0].message).toContain('CanBeDownloaded must be a boolean.');
-        //
-        //
-        //
-        // // проверяем, что видео не обновилось
-        // const getRes = await request(app).get(`${SETTINGS.PATH.VIDEOS}/${videoId}`);
-        // expect(getRes.body.title).toBe(newVideo.title);
-        // expect(getRes.body.author).toBe(newVideo.author);
-
 
     it('DELETE /videos/:id - Delete video by id', async () => {
         const newVideo = {

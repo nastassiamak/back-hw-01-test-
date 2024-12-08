@@ -51,4 +51,5 @@ export type UpdateVideoInputModel = {
     canBeDownloaded?: boolean;
     minAgeRestriction?: number | null;
     publicationDate?: string;
+
 }

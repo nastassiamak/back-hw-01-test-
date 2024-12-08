@@ -71,7 +71,9 @@ export const updateVideo = (req: Request<{ id: string }, {}, UpdateVideoInputMod
     if (updateData.canBeDownloaded !== undefined) video.canBeDownloaded = updateData.canBeDownloaded;
     if (updateData.minAgeRestriction !== undefined) video.minAgeRestriction = updateData.minAgeRestriction;
     if (updateData.publicationDate) video.publicationDate = updateData.publicationDate;
-
+    if (updateData.availableResolutions) {
+        video.availableResolutions = updateData.availableResolutions;
+    }
 
     res.status(HTTP_STATUSES.NO_CONTENT_204).send();
 };
