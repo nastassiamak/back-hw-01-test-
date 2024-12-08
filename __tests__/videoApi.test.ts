@@ -136,77 +136,50 @@ describe('Video API', () => {
         }));
     });
 
-    it('PUT /videos/:id - should return error if title is too long and minAgeRestriction is invalid; status 400', async () => {
+    it('PUT /videos/:id - should return error for all fields if passed body is incorrect; status 400', async () => {
         const newVideo = {
-            title: 'Test Video',
-            author: 'Test Author',
+            title: 'Valid Title',
+            author: 'Valid Author',
             availableResolutions: ['P360'],
             canBeDownloaded: false,
             minAgeRestriction: 18
         };
 
-        // Создание видео для теста
+        // Создаем видео для теста
         const createRes = await request(app).post(SETTINGS.PATH.VIDEOS).send(newVideo);
         const videoId = createRes.body.id;
 
-        // Неверные данные для обновления
+        // Некорректные данные для обновления
         const invalidUpdateData = {
             title: "length_41-oGuSMzyRUxdnN7ClQA7QbIEk5eMianm", // Слишком длинный заголовок
-            author: "valid author",
-            availableResolutions: ["P720"],
-            canBeDownloaded: true,
-            minAgeRestriction: -1 // здесь можно проверить с чем связано ограничение
+            author: "TooLongAuthorNameThatExceedsLimit", // Слишком длинный автор
+            availableResolutions: [], // Пустой массив разрешений
+            canBeDownloaded: 'not_a_boolean', // Неверный тип для canBeDownloaded
+            minAgeRestriction: -5, // Неверное значение
+            publicationDate: 1995 // Неверный формат
         };
 
         // Запрос на PUT
         const res = await request(app).put(`${SETTINGS.PATH.VIDEOS}/${videoId}`).send(invalidUpdateData);
+
+        // Ожидаем статус 400
         expect(res.status).toBe(HTTP_STATUSES.BAD_REQUEST_400);
-        expect(res.body.errorsMessages).toEqual(expect.arrayContaining([
-            expect.objectContaining({
-                field: 'title',
-                message: expect.any(String),
-            }),
-            expect.objectContaining({
-                field: 'minAgeRestriction',
-                message: expect.any(String), // здесь вы можете указать конкретное сообщение об ошибке, если оно фиксировано
-            }),
-        ]));
+
+        // Явно указываем все ожидаемые ошибки
+        const expectedErrors = [
+            { field: 'title', message: 'Title is required and must be a string with a maximum length of 40.' },
+            { field: 'author', message: 'Author is required and must be a string with a maximum length of 20.' },
+            { field: 'availableResolutions', message: 'At least one resolution must be provided and it must be an array.' },
+            { field: 'canBeDownloaded', message: 'CanBeDownloaded must be a boolean.' },
+            { field: 'minAgeRestriction', message: 'minAgeRestriction must be a non-negative integer and must follow any custom limits.' },
+            { field: 'publicationDate', message: expect.any(String) }
+        ];
+
+        // Теперь проверяем, что ответ содержит именно эти сообщения об ошибках
+        expect(res.body.errorsMessages).toEqual(expectedErrors);
     });
 
 
-    // it('PUT /videos/:id - should return error if passed body is incorrect; status 400', async () => {
-    //     const newVideo = {
-    //         title: 'Test Video',
-    //         author: 'Test Author',
-    //         availableResolutions: ['P360'],
-    //         canBeDownloaded: false,
-    //         minAgeRestriction: 18
-    //     };
-    //
-    //     // Сначала создаем видео, чтобы получить его ID для обновления
-    //     const createRes = await request(app).post(SETTINGS.PATH.VIDEOS).send(newVideo);
-    //     const videoId = createRes.body.id;
-    //
-    //     // Теперь попытаемся обновить видео с некорректными данными
-    //     const invalidUpdateData = {
-    //         title: '', // Неверный, пустой заголовок
-    //         author: 'Updated Author',
-    //         availableResolutions: [] // Неверный: разрешения должны быть массивом с хотя бы одним элементом
-    //     };
-    //
-    //     const res = await request(app).put(`${SETTINGS.PATH.VIDEOS}/${videoId}`).send(invalidUpdateData);
-    //     expect(res.status).toBe(HTTP_STATUSES.BAD_REQUEST_400);
-    //     expect(res.body.errorsMessages).toEqual(expect.arrayContaining([
-    //         expect.objectContaining({
-    //             field: 'title',
-    //             message: 'Title is required and must be a string with a maximum length of 40.',
-    //         }),
-    //         expect.objectContaining({
-    //             field: 'availableResolutions',
-    //             message: 'At least one resolution must be provided and it must be an array.',
-    //         }),
-    //     ]));
-    // });
 
     it('DELETE /videos/:id - Delete video by id', async () => {
         const newVideo = {

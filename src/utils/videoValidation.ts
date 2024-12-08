@@ -38,6 +38,13 @@ export function validateCreateVideoInput(input: UpdateVideoInputModel): APIError
             errors.push({ message: "minAgeRestriction must be a non-negative integer and must follow any custom limits.", field: "minAgeRestriction" });
         }
     }
+    if (input.publicationDate !== undefined) {
+        if (typeof input.publicationDate !== 'string') {
+            errors.push({ message: "publicationDate must be a string.", field: "publicationDate" });
+        } else if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(input.publicationDate)) {
+            errors.push({ message: "publicationDate must follow the ISO 8601 format.\"", field: "publicationDate" });
+        }
+    }
 
     return errors.length > 0 ? { errorsMessages: errors } : null;
 }
