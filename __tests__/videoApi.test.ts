@@ -60,7 +60,7 @@ describe('Video API', () => {
         const res = await request(app).post(SETTINGS.PATH.VIDEOS).send(newVideo);
         expect(res.status).toBe(HTTP_STATUSES.BAD_REQUEST_400);
         expect(res.body.errorsMessages[0].field).toBe('availableResolutions');
-        //expect(res.body.errorsMessages[0].message).toBe('At least one resolution must be provided and it must be an array.');
+        //expect(res.body.errorsMessages[0].message).toBe('At least one resolution must be provided, and it must be an array.');
     });
 
     it('POST /videos - Create video with invalid canBeDownloaded', async () => {
@@ -90,7 +90,6 @@ describe('Video API', () => {
         expect(res.body.errorsMessages[0].field).toBe('minAgeRestriction');
        // expect(res.body.errorsMessages[0].message).toContain('minAgeRestriction must be an integer.');
     });
-
 
     it('GET /videos/:id - Get video by id', async () => {
         const newVideo = {
@@ -198,8 +197,6 @@ describe('Video API', () => {
 
 
     });
-
-
 
     it('DELETE /videos/:id - Delete video by id', async () => {
         const newVideo = {

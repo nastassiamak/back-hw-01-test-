@@ -33,20 +33,19 @@ export function validateCreateVideoInput(input: UpdateVideoInputModel): APIError
 // Проверка minAgeRestriction
     if (input.minAgeRestriction !== undefined) {
         console.log('Validating minAgeRestriction:', input.minAgeRestriction); // Логируем значение
-        if (typeof input.minAgeRestriction !== 'number' || !Number.isInteger(input.minAgeRestriction)) {
-            errors.push({ message: "minAgeRestriction must be an integer.", field: "minAgeRestriction" });
-        } else if (input.minAgeRestriction < 0) { // Проверка на неотрицательные целые числа
-            errors.push({ message: "minAgeRestriction must be a non-negative integer.", field: "minAgeRestriction" });
+        if (typeof input.minAgeRestriction !== 'number' || !Number.isInteger(input.minAgeRestriction) || input.minAgeRestriction < 0) {
+            errors.push({
+                message: "minAgeRestriction must be an integer or must be a non-negative integer",
+                field: "minAgeRestriction"
+            });
         }
     }
 
     if (input.publicationDate !== undefined) {
-        if (typeof input.publicationDate !== 'string') {
-            errors.push({ message: "publicationDate must be a string.", field: "publicationDate" });
-        } else if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(input.publicationDate)) {
-            errors.push({ message: "publicationDate must follow the ISO 8601 format.\"", field: "publicationDate" });
+        if (typeof input.publicationDate !== 'string' || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(input.publicationDate)) {
+            errors.push({ message: "publicationDate must be a string or publicationDate must follow the ISO 8601 format.", field: "publicationDate" });
         }
     }
-
+    console.log('Validating minAgeRestriction:', input.minAgeRestriction);
     return errors.length > 0 ? { errorsMessages: errors } : null;
 }
