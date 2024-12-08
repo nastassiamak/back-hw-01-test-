@@ -155,7 +155,7 @@ describe('Video API', () => {
             author: "valid author",
             availableResolutions: ["P720"],
             canBeDownloaded: true,
-            minAgeRestriction: 25 // здесь можно проверить с чем связано ограничение
+            minAgeRestriction: -1 // здесь можно проверить с чем связано ограничение
         };
 
         // Запрос на PUT
