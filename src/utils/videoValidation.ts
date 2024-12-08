@@ -30,11 +30,10 @@ export function validateCreateVideoInput(input: UpdateVideoInputModel): APIError
         errors.push({ message: "CanBeDownloaded must be a boolean.", field: "canBeDownloaded" });
     }
 
-    // Проверка minAgeRestriction
     if (input.minAgeRestriction !== undefined) {
         if (typeof input.minAgeRestriction !== 'number' || !Number.isInteger(input.minAgeRestriction)) {
             errors.push({ message: "minAgeRestriction must be an integer.", field: "minAgeRestriction" });
-        } else if (input.minAgeRestriction < 0) {
+        } else if (input.minAgeRestriction < 0) { // Убедитесь, что здесь нет других условий
             errors.push({ message: "minAgeRestriction must be a non-negative integer.", field: "minAgeRestriction" });
         }
     }

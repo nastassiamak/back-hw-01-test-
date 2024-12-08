@@ -136,6 +136,78 @@ describe('Video API', () => {
         }));
     });
 
+    it('PUT /videos/:id - should return error if title is too long and minAgeRestriction is invalid; status 400', async () => {
+        const newVideo = {
+            title: 'Test Video',
+            author: 'Test Author',
+            availableResolutions: ['P360'],
+            canBeDownloaded: false,
+            minAgeRestriction: 18
+        };
+
+        // Создание видео для теста
+        const createRes = await request(app).post(SETTINGS.PATH.VIDEOS).send(newVideo);
+        const videoId = createRes.body.id;
+
+        // Неверные данные для обновления
+        const invalidUpdateData = {
+            title: "length_41-oGuSMzyRUxdnN7ClQA7QbIEk5eMianm", // Слишком длинный заголовок
+            author: "valid author",
+            availableResolutions: ["P720"],
+            canBeDownloaded: true,
+            minAgeRestriction: 25 // здесь можно проверить с чем связано ограничение
+        };
+
+        // Запрос на PUT
+        const res = await request(app).put(`${SETTINGS.PATH.VIDEOS}/${videoId}`).send(invalidUpdateData);
+        expect(res.status).toBe(HTTP_STATUSES.BAD_REQUEST_400);
+        expect(res.body.errorsMessages).toEqual(expect.arrayContaining([
+            expect.objectContaining({
+                field: 'title',
+                message: 'Title is required and must be a string with a maximum length of 40.',
+            }),
+            // также проверьте поле minAgeRestriction, если оно требуется
+            expect.objectContaining({
+                field: 'minAgeRestriction', // Проверьте, если у вас есть ошибка, возвращающаяся для него
+                message: expect.any(String), // Замените expect.any(String) на конкретное сообщение, если это необходимо
+            }),
+        ]));
+    });
+
+    // it('PUT /videos/:id - should return error if passed body is incorrect; status 400', async () => {
+    //     const newVideo = {
+    //         title: 'Test Video',
+    //         author: 'Test Author',
+    //         availableResolutions: ['P360'],
+    //         canBeDownloaded: false,
+    //         minAgeRestriction: 18
+    //     };
+    //
+    //     // Сначала создаем видео, чтобы получить его ID для обновления
+    //     const createRes = await request(app).post(SETTINGS.PATH.VIDEOS).send(newVideo);
+    //     const videoId = createRes.body.id;
+    //
+    //     // Теперь попытаемся обновить видео с некорректными данными
+    //     const invalidUpdateData = {
+    //         title: '', // Неверный, пустой заголовок
+    //         author: 'Updated Author',
+    //         availableResolutions: [] // Неверный: разрешения должны быть массивом с хотя бы одним элементом
+    //     };
+    //
+    //     const res = await request(app).put(`${SETTINGS.PATH.VIDEOS}/${videoId}`).send(invalidUpdateData);
+    //     expect(res.status).toBe(HTTP_STATUSES.BAD_REQUEST_400);
+    //     expect(res.body.errorsMessages).toEqual(expect.arrayContaining([
+    //         expect.objectContaining({
+    //             field: 'title',
+    //             message: 'Title is required and must be a string with a maximum length of 40.',
+    //         }),
+    //         expect.objectContaining({
+    //             field: 'availableResolutions',
+    //             message: 'At least one resolution must be provided and it must be an array.',
+    //         }),
+    //     ]));
+    // });
+
     it('DELETE /videos/:id - Delete video by id', async () => {
         const newVideo = {
             title: 'Test Video',
