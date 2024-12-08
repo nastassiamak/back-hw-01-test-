@@ -30,14 +30,16 @@ export function validateCreateVideoInput(input: UpdateVideoInputModel): APIError
         errors.push({ message: "CanBeDownloaded must be a boolean.", field: "canBeDownloaded" });
     }
 
+// Проверка minAgeRestriction
     if (input.minAgeRestriction !== undefined) {
-        console.log('Validating minAgeRestriction:', input.minAgeRestriction); // Логирование
+        console.log('Validating minAgeRestriction:', input.minAgeRestriction); // Логируем значение
         if (typeof input.minAgeRestriction !== 'number' || !Number.isInteger(input.minAgeRestriction)) {
             errors.push({ message: "minAgeRestriction must be an integer.", field: "minAgeRestriction" });
-        } else if (input.minAgeRestriction < 0 || input.minAgeRestriction > 18) { // hypothetic maximum age
-            errors.push({ message: "minAgeRestriction must be a non-negative integer and must follow any custom limits.", field: "minAgeRestriction" });
+        } else if (input.minAgeRestriction < 0) { // Проверка на неотрицательные целые числа
+            errors.push({ message: "minAgeRestriction must be a non-negative integer.", field: "minAgeRestriction" });
         }
     }
+
     if (input.publicationDate !== undefined) {
         if (typeof input.publicationDate !== 'string') {
             errors.push({ message: "publicationDate must be a string.", field: "publicationDate" });
