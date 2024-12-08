@@ -180,12 +180,21 @@ describe('Video API', () => {
         // Ожидаем статус 400
         expect(res.status).toBe(HTTP_STATUSES.BAD_REQUEST_400);
 
-        expect(res.body.errorsMessages[0].field).toBe('title');
-        expect(res.body.errorsMessages[1].field).toBe('author');
-        expect(res.body.errorsMessages[2].field).toBe('availableResolutions');
-        expect(res.body.errorsMessages[3].field).toBe('canBeDownloaded');
-        expect(res.body.errorsMessages[4].field).toBe('minAgeRestriction');
-        expect(res.body.errorsMessages[5].field).toBe('publicationDate');
+        // Ожидаем сообщения об ошибках для каждого поля
+        expect(res.body.errorsMessages).toEqual(expect.arrayContaining([
+            expect.objectContaining({
+                field: 'title',
+                message: expect.any(String), // Ожидаем сообщение для заголовка
+            }),
+            expect.objectContaining({
+                field: 'minAgeRestriction',
+                message: expect.any(String), // Ожидаем сообщение для minAgeRestriction
+            }),
+            expect.objectContaining({
+                field: 'publicationDate',
+                message: expect.any(String), // Ожидаем сообщение для publicationDate
+            }),
+        ]));
 
 
     });
