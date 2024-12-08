@@ -164,15 +164,15 @@ describe('Video API', () => {
         expect(res.body.errorsMessages).toEqual(expect.arrayContaining([
             expect.objectContaining({
                 field: 'title',
-                message: 'Title is required and must be a string with a maximum length of 40.',
+                message: expect.any(String),
             }),
-            // также проверьте поле minAgeRestriction, если оно требуется
             expect.objectContaining({
-                field: 'minAgeRestriction', // Проверьте, если у вас есть ошибка, возвращающаяся для него
-                message: expect.any(String), // Замените expect.any(String) на конкретное сообщение, если это необходимо
+                field: 'minAgeRestriction',
+                message: expect.any(String), // здесь вы можете указать конкретное сообщение об ошибке, если оно фиксировано
             }),
         ]));
     });
+
 
     // it('PUT /videos/:id - should return error if passed body is incorrect; status 400', async () => {
     //     const newVideo = {

@@ -25,6 +25,7 @@ export const getVideoById = (req: Request<{ id: string }>, res: Response<VideoTy
 };
 
 export const createVideo = (req: Request<CreateVideoInputModel>, res: Response<VideoType | APIErrorResult>) => {
+    console.log('Received create video request:', req.body); // Логирование входящих данных
     const validationError = validateCreateVideoInput(req.body);
     if (validationError) {
         res.status(HTTP_STATUSES.BAD_REQUEST_400).json(validationError);
@@ -43,6 +44,7 @@ export const createVideo = (req: Request<CreateVideoInputModel>, res: Response<V
     };
 
     db.videos.push(newVideo);
+    console.log('Video created successfully:', newVideo); // Логирование успешно созданного видео
     res.status(HTTP_STATUSES.CREATED_201).json(newVideo);
 };
 
@@ -53,6 +55,7 @@ export const updateVideo = (req: Request<{ id: string }, {}, UpdateVideoInputMod
 
     const video = db.videos.find(v => v.id === Number(req.params.id));
     if (!video) {
+        console.log('Video not found for ID:', req.params.id); // Логирование отсутствующего видео
         res.status(HTTP_STATUSES.NOT_FOUND_404).json({ errorsMessages: [{ message: "Video not found", field: "id" }] });
         return;
     }
@@ -60,6 +63,7 @@ export const updateVideo = (req: Request<{ id: string }, {}, UpdateVideoInputMod
     const updateData: UpdateVideoInputModel = req.body;
     const validationError = validateCreateVideoInput(updateData);
     if (validationError) {
+        console.log('Validation error during update:', validationError); // Логирование ошибки валидации
         res.status(HTTP_STATUSES.BAD_REQUEST_400).json(validationError);
         return;
     }
@@ -75,7 +79,9 @@ export const updateVideo = (req: Request<{ id: string }, {}, UpdateVideoInputMod
         video.availableResolutions = updateData.availableResolutions;
     }
 
+    console.log('Video updated successfully:', video); // Логирование обновленного видео
     res.status(HTTP_STATUSES.NO_CONTENT_204).send();
+
 };
 
 // Функция удаления видео

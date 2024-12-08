@@ -33,8 +33,8 @@ export function validateCreateVideoInput(input: UpdateVideoInputModel): APIError
     if (input.minAgeRestriction !== undefined) {
         if (typeof input.minAgeRestriction !== 'number' || !Number.isInteger(input.minAgeRestriction)) {
             errors.push({ message: "minAgeRestriction must be an integer.", field: "minAgeRestriction" });
-        } else if (input.minAgeRestriction < 0) { // Убедитесь, что здесь нет других условий
-            errors.push({ message: "minAgeRestriction must be a non-negative integer.", field: "minAgeRestriction" });
+        } else if (input.minAgeRestriction < 0 || input.minAgeRestriction > 18) { // hypothetic maximum age
+            errors.push({ message: "minAgeRestriction must be a non-negative integer and must follow any custom limits.", field: "minAgeRestriction" });
         }
     }
 
