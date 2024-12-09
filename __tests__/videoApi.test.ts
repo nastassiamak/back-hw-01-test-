@@ -8,12 +8,8 @@ import app from "../src/app";
 
 describe('Video API', () => {
     beforeEach(async () => {
-        await request(app).delete('/__test__/data')
-        // Очищаем массив videos перед каждым тестом для предотвращения влияния предыдущих тестов
-        // (Если у вас есть способ сбросить состояние вашего API, используйте его тут)
+        await request(app).delete('/testing/all-data')
         db.videos = [];
-
-
     });
 
     it('GET /videos - Success', async () => {
@@ -36,6 +32,7 @@ describe('Video API', () => {
         expect(res.body.title).toBe(newVideo.title);
         expect(res.body.author).toBe(newVideo.author);
     });
+
     it('POST /videos - Create video with invalid input; status 400', async () => {
         const invalidVideoData = {
             title: "length_41-oGuSMzyRUxdnN7ClQA7QbIEk5eMianm", // Слишком длинный заголовок
@@ -79,60 +76,6 @@ describe('Video API', () => {
             }),
         ]));
     });
-
-    // it('POST /videos - Create video with invalid resolutions', async () => {
-    //     const newVideo = {
-    //         title: 'Test Video',
-    //         author: 'Test Author',
-    //         availableResolutions: ['P360', 'INVALID_RESOLUTION'], // one invalid resolution
-    //     };
-    //
-    //     const res = await request(app).post(SETTINGS.PATH.VIDEOS).send(newVideo);
-    //     expect(res.status).toBe(HTTP_STATUSES.BAD_REQUEST_400);
-    //     expect(res.body.errorsMessages[0].field).toBe('availableResolutions');
-    //     //expect(res.body.errorsMessages[0].message).toContain('Invalid resolutions');
-    // });
-    //
-    // it('POST /videos - Create video without availableResolutions', async () => {
-    //     const newVideo = {
-    //         title: 'Test Video',
-    //         author: 'Test Author',
-    //         // availableResolutions is missing
-    //     };
-    //
-    //     const res = await request(app).post(SETTINGS.PATH.VIDEOS).send(newVideo);
-    //     expect(res.status).toBe(HTTP_STATUSES.BAD_REQUEST_400);
-    //     expect(res.body.errorsMessages[0].field).toBe('availableResolutions');
-    //     //expect(res.body.errorsMessages[0].message).toBe('At least one resolution must be provided, and it must be an array.');
-    // });
-    //
-    // it('POST /videos - Create video with invalid canBeDownloaded', async () => {
-    //     const newVideo = {
-    //         title: 'Test Video',
-    //         author: 'Test Author',
-    //         availableResolutions: ['P360'],
-    //         canBeDownloaded: 'true',
-    //     };
-    //
-    //     const res = await request(app).post(SETTINGS.PATH.VIDEOS).send(newVideo);
-    //     expect(res.status).toBe(HTTP_STATUSES.BAD_REQUEST_400);
-    //     expect(res.body.errorsMessages[0].field).toBe('canBeDownloaded');
-    //     //expect(res.body.errorsMessages[0].message).toContain('CanBeDownloaded must be a boolean.');
-    // });
-    //
-    // it('POST /videos - Create video with invalid minAgeRestriction', async () => {
-    //     const newVideo = {
-    //         title: 'Test Video',
-    //         author: 'Test Author',
-    //         availableResolutions: ['P360'],
-    //         minAgeRestriction: -1
-    //     };
-    //
-    //     const res = await request(app).post(SETTINGS.PATH.VIDEOS).send(newVideo);
-    //     expect(res.status).toBe(HTTP_STATUSES.BAD_REQUEST_400);
-    //     expect(res.body.errorsMessages[0].field).toBe('minAgeRestriction');
-    //    // expect(res.body.errorsMessages[0].message).toContain('minAgeRestriction must be an integer.');
-    // });
 
     it('GET /videos/:id - Get video by id', async () => {
         const newVideo = {
@@ -192,6 +135,7 @@ describe('Video API', () => {
             publicationDate: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/), // Проверка ISO
         }));
     });
+
     it('PUT /videos/:id - should return error if title is too long and minAgeRestriction is invalid; status 400', async () => {
         const newVideo = {
             title: 'Valid Title',
@@ -298,5 +242,25 @@ describe('Video API', () => {
         // Проверяем, что видео было удалено
         const checkRes = await request(app).get(`${SETTINGS.PATH.VIDEOS}/${videoId}`);
         expect(checkRes.status).toBe(HTTP_STATUSES.NOT_FOUND_404);
+    });
+
+    it('DELETE /testing/all-data - should remove all data; status 204', async () => {
+        // Допустим, у вас уже есть некоторые данные в базе данных
+        const newVideo = {
+            title: 'Test Video',
+            author: 'Test Author',
+            availableResolutions: ['P360'],
+            canBeDownloaded: false,
+            minAgeRestriction: 18
+        };
+
+        await request(app).post(SETTINGS.PATH.VIDEOS).send(newVideo); // Создаем видео для теста
+
+        const res = await request(app).delete('/testing/all-data'); // Запрос на удаление всех данных
+        expect(res.status).toBe(204); // Ожидаем статус 204
+
+        // Проверяем, что данные действительно удалены
+        const allVideosRes = await request(app).get(SETTINGS.PATH.VIDEOS);
+        expect(allVideosRes.body).toEqual([]); // Ожидаем пустой массив
     });
 });

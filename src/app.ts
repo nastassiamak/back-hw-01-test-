@@ -1,4 +1,4 @@
-import express from 'express';
+import express, {Request, Response} from 'express';
 import {SETTINGS} from "./setting";
 import {videosRouter} from "./models/videoRouter";
 import {HTTP_STATUSES} from "./models/videoModels";
@@ -17,8 +17,9 @@ app.get('/', (req, res) => {
 })
 app.use(SETTINGS.PATH.VIDEOS, videosRouter)
 
+
 //Дефолтное состояние БД
-app.delete('/__test__/data', (req, res) => {
+app.delete('/testing/all-data', (req, res) => {
     db.videos = [];
     res.sendStatus(HTTP_STATUSES.NO_CONTENT_204)
 });

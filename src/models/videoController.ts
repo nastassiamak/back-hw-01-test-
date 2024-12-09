@@ -10,8 +10,10 @@ import {
 
 import {validateCreateVideoInput} from "../utils/videoValidation";
 import {db, getNextId} from "../db/db";
+import request from "supertest";
 
-export const getAllVideos = (red: Request, res: Response<VideoType[]>) => {
+
+export const getAllVideos = (req: Request, res: Response<VideoType[]>) => {
     res.json(db.videos);
 };
 
