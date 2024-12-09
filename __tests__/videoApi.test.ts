@@ -192,6 +192,46 @@ describe('Video API', () => {
             publicationDate: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/), // Проверка ISO
         }));
     });
+    it('PUT /videos/:id - should return error if title is too long and minAgeRestriction is invalid; status 400', async () => {
+        const newVideo = {
+            title: 'Valid Title',
+            author: 'Valid Author',
+            availableResolutions: ['P360'],
+            canBeDownloaded: false,
+            minAgeRestriction: 18
+        };
+
+        // Создаем видео для теста
+        const createRes = await request(app).post(SETTINGS.PATH.VIDEOS).send(newVideo);
+        const videoId = createRes.body.id;
+
+        // Некорректные данные для обновления
+        const invalidUpdateData = {
+            title: "length_41-oGuSMzyRUxdnN7ClQA7QbIEk5eMianm", // Слишком длинный заголовок
+            author: "valid author",
+            availableResolutions: ["P240", "P720"],
+            canBeDownloaded: true,
+            minAgeRestriction: 25, // Неправильное значение
+            publicationDate: "2024-12-11T13:52:38.140Z" // Валидация тут не верна
+        };
+
+        const res = await request(app).put(`${SETTINGS.PATH.VIDEOS}/${videoId}`).send(invalidUpdateData);
+
+        // Ожидаем статус 400
+        expect(res.status).toBe(HTTP_STATUSES.BAD_REQUEST_400);
+
+        // Ожидаем сообщения об ошибках
+        expect(res.body.errorsMessages).toEqual(expect.arrayContaining([
+            expect.objectContaining({
+                field: 'title',
+                message: 'Title is required and must be a string with a maximum length of 40.',
+            }),
+            expect.objectContaining({
+                field: 'minAgeRestriction', // Убедитесь, что это значение возвращается
+                message: expect.any(String),
+            }),
+        ]));
+    });
 
     it('PUT /videos/:id - should return error for all fields if passed body is incorrect; status 400', async () => {
         const newVideo = {
