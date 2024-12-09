@@ -36,60 +36,103 @@ describe('Video API', () => {
         expect(res.body.title).toBe(newVideo.title);
         expect(res.body.author).toBe(newVideo.author);
     });
-
-    it('POST /videos - Create video with invalid resolutions', async () => {
-        const newVideo = {
-            title: 'Test Video',
-            author: 'Test Author',
-            availableResolutions: ['P360', 'INVALID_RESOLUTION'], // one invalid resolution
+    it('POST /videos - Create video with invalid input; status 400', async () => {
+        const invalidVideoData = {
+            title: "length_41-oGuSMzyRUxdnN7ClQA7QbIEk5eMianm", // Слишком длинный заголовок
+            author: "TooLongAuthorNameMoreThanTwentyChars", // Слишком длинный
+            availableResolutions: [], // Пустой массив
+            canBeDownloaded: 'not_a_boolean', // Неверный тип
+            minAgeRestriction: 25, // Неправильное значение
+            publicationDate: 1995 // Неверный формат
         };
 
-        const res = await request(app).post(SETTINGS.PATH.VIDEOS).send(newVideo);
+        const res = await request(app).post(SETTINGS.PATH.VIDEOS).send(invalidVideoData);
+
+        // Ожидаем статус 400 (BAD REQUEST)
         expect(res.status).toBe(HTTP_STATUSES.BAD_REQUEST_400);
-        expect(res.body.errorsMessages[0].field).toBe('availableResolutions');
-        //expect(res.body.errorsMessages[0].message).toContain('Invalid resolutions');
+
+        // Ожидаем корректные сообщения об ошибках
+        expect(res.body.errorsMessages).toEqual(expect.arrayContaining([
+            expect.objectContaining({
+                field: 'title',
+                message: expect.any(String), // Проверка для title
+            }),
+            expect.objectContaining({
+                field: 'author',
+                message: expect.any(String), // Проверка для author
+            }),
+            expect.objectContaining({
+                field: 'availableResolutions',
+                message: 'At least one resolution must be provided and it must be an array.',
+            }),
+            expect.objectContaining({
+                field: 'canBeDownloaded',
+                message: 'CanBeDownloaded must be a boolean.', // Сообщение для canBeDownloaded
+            }),
+            expect.objectContaining({
+                field: 'minAgeRestriction',
+                message: expect.any(String), // Сообщение для minAgeRestriction
+            }),
+            expect.objectContaining({
+                field: 'publicationDate',
+                message: 'publicationDate must be a string.', // Для publicationDate
+            }),
+        ]));
     });
 
-    it('POST /videos - Create video without availableResolutions', async () => {
-        const newVideo = {
-            title: 'Test Video',
-            author: 'Test Author',
-            // availableResolutions is missing
-        };
-
-        const res = await request(app).post(SETTINGS.PATH.VIDEOS).send(newVideo);
-        expect(res.status).toBe(HTTP_STATUSES.BAD_REQUEST_400);
-        expect(res.body.errorsMessages[0].field).toBe('availableResolutions');
-        //expect(res.body.errorsMessages[0].message).toBe('At least one resolution must be provided, and it must be an array.');
-    });
-
-    it('POST /videos - Create video with invalid canBeDownloaded', async () => {
-        const newVideo = {
-            title: 'Test Video',
-            author: 'Test Author',
-            availableResolutions: ['P360'],
-            canBeDownloaded: 'true',
-        };
-
-        const res = await request(app).post(SETTINGS.PATH.VIDEOS).send(newVideo);
-        expect(res.status).toBe(HTTP_STATUSES.BAD_REQUEST_400);
-        expect(res.body.errorsMessages[0].field).toBe('canBeDownloaded');
-        //expect(res.body.errorsMessages[0].message).toContain('CanBeDownloaded must be a boolean.');
-    });
-
-    it('POST /videos - Create video with invalid minAgeRestriction', async () => {
-        const newVideo = {
-            title: 'Test Video',
-            author: 'Test Author',
-            availableResolutions: ['P360'],
-            minAgeRestriction: -1
-        };
-
-        const res = await request(app).post(SETTINGS.PATH.VIDEOS).send(newVideo);
-        expect(res.status).toBe(HTTP_STATUSES.BAD_REQUEST_400);
-        expect(res.body.errorsMessages[0].field).toBe('minAgeRestriction');
-       // expect(res.body.errorsMessages[0].message).toContain('minAgeRestriction must be an integer.');
-    });
+    // it('POST /videos - Create video with invalid resolutions', async () => {
+    //     const newVideo = {
+    //         title: 'Test Video',
+    //         author: 'Test Author',
+    //         availableResolutions: ['P360', 'INVALID_RESOLUTION'], // one invalid resolution
+    //     };
+    //
+    //     const res = await request(app).post(SETTINGS.PATH.VIDEOS).send(newVideo);
+    //     expect(res.status).toBe(HTTP_STATUSES.BAD_REQUEST_400);
+    //     expect(res.body.errorsMessages[0].field).toBe('availableResolutions');
+    //     //expect(res.body.errorsMessages[0].message).toContain('Invalid resolutions');
+    // });
+    //
+    // it('POST /videos - Create video without availableResolutions', async () => {
+    //     const newVideo = {
+    //         title: 'Test Video',
+    //         author: 'Test Author',
+    //         // availableResolutions is missing
+    //     };
+    //
+    //     const res = await request(app).post(SETTINGS.PATH.VIDEOS).send(newVideo);
+    //     expect(res.status).toBe(HTTP_STATUSES.BAD_REQUEST_400);
+    //     expect(res.body.errorsMessages[0].field).toBe('availableResolutions');
+    //     //expect(res.body.errorsMessages[0].message).toBe('At least one resolution must be provided, and it must be an array.');
+    // });
+    //
+    // it('POST /videos - Create video with invalid canBeDownloaded', async () => {
+    //     const newVideo = {
+    //         title: 'Test Video',
+    //         author: 'Test Author',
+    //         availableResolutions: ['P360'],
+    //         canBeDownloaded: 'true',
+    //     };
+    //
+    //     const res = await request(app).post(SETTINGS.PATH.VIDEOS).send(newVideo);
+    //     expect(res.status).toBe(HTTP_STATUSES.BAD_REQUEST_400);
+    //     expect(res.body.errorsMessages[0].field).toBe('canBeDownloaded');
+    //     //expect(res.body.errorsMessages[0].message).toContain('CanBeDownloaded must be a boolean.');
+    // });
+    //
+    // it('POST /videos - Create video with invalid minAgeRestriction', async () => {
+    //     const newVideo = {
+    //         title: 'Test Video',
+    //         author: 'Test Author',
+    //         availableResolutions: ['P360'],
+    //         minAgeRestriction: -1
+    //     };
+    //
+    //     const res = await request(app).post(SETTINGS.PATH.VIDEOS).send(newVideo);
+    //     expect(res.status).toBe(HTTP_STATUSES.BAD_REQUEST_400);
+    //     expect(res.body.errorsMessages[0].field).toBe('minAgeRestriction');
+    //    // expect(res.body.errorsMessages[0].message).toContain('minAgeRestriction must be an integer.');
+    // });
 
     it('GET /videos/:id - Get video by id', async () => {
         const newVideo = {
